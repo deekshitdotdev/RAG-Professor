@@ -1,0 +1,12 @@
+node_modules/
+venv/
+.env
+__pycache__/
+*.pyc
+dist/
+build/
+.vscode/
+.idea/
+.chroma/
+uploads/
+node_modules
