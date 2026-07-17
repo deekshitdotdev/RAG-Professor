@@ -17,6 +17,7 @@ GPUs — pick the model that matches your hardware from the table below.
 - Dual-core CPU or better
 - 5 GB free disk space
 - Ollama installed
+- Node.js installed (for the React frontend)
 
 ### No GPU? No Problem
 
@@ -82,7 +83,7 @@ Running larger models (8B and up) pushes sustained CPU/GPU load for the
 whole time an answer streams, and on laptops in particular this shows up
 as fan noise, hot chassis, and thermal throttling — which then makes
 generation *slower*, not faster. This is worse if any part of the model
-spills from VRAM onto CPU (see the VRAM notes below).
+spills from VRAM onto CPU.
 
 If you notice your laptop getting uncomfortably hot, throttling, or the
 fans running at full speed constantly:
@@ -158,10 +159,6 @@ ollama pull qwen3-vl:2b
   no extractable text (i.e. it's scanned/image-only) — it OCRs that page
   before chunking. You never call it directly; ingestion decides per-page.
 
-Then leave Ollama's server running in its own terminal window:
-```
-ollama serve
-```
 (If you installed Ollama as a Windows service, or via Homebrew/systemd on
 macOS/Linux, it may already be running in the background — check with
 `ollama list`.)
@@ -187,9 +184,8 @@ anytime from the sidebar dropdowns without restarting anything.
 pip install torch --index-url https://download.pytorch.org/whl/cpu
 ```
 We deliberately install the **CPU** build of PyTorch here — the embedding
-model runs on CPU by default (see "Why CPU embeddings?" below), so you
-don't need the multi-GB CUDA build of torch at all. This alone saves you
-a large, fragile install step.
+model runs on CPU by default, so you don't need the multi-GB CUDA build of
+torch at all. This alone saves you a large, fragile install step.
 
 If you later want GPU embeddings anyway (only worth it if your GPU has
 VRAM to spare beyond what the LLM needs), replace the command above with
@@ -197,7 +193,7 @@ the CUDA build matching your driver from
 https://pytorch.org/get-started/locally/, and set `EMBEDDING_DEVICE=cuda`
 (see Configuration below).
 
-### 2.4 Everything else
+### 2.4 Backend dependencies
 ```
 cd rag_project
 pip install -r requirements.txt
@@ -207,37 +203,57 @@ The first time you run the app, `sentence-transformers` will download the
 embedding model (`BAAI/bge-base-en-v1.5`, ~440MB) — this needs internet
 **once**. After that, it's cached locally and the app works fully offline.
 
----
-
-## 3. Running it
-
-The frontend is a React app, so it needs a one-time build (or its own dev
-server) in addition to the backend and Ollama.
-
-**One-time frontend build:**
-```
+### 2.5 Frontend dependencies
+The frontend is a React app. Install its dependencies once:
+```bash
 cd frontend
 npm install
-npm run build
 ```
-This produces a static build that the backend serves. If you're actively
-developing the UI, you can instead run `npm run dev` in its own terminal
-and point it at the backend's API URL.
 
-Then, two things need to be running at once, in two terminals:
+---
 
-**Terminal 1 — the LLM server:**
-```
+## 3. Running RAG-Professor
+
+### Start Ollama
+Open a terminal and run:
+```bash
 ollama serve
 ```
+If Ollama is installed as a background service, you can skip this step.
 
-**Terminal 2 — the app:**
-```
+### Option 1 (Recommended)
+Simply run:
+```bash
 run.bat
 ```
-(or manually: `cd backend && python -m uvicorn main:app --host 127.0.0.1 --port 8000`)
+The launcher automatically:
+- Starts the FastAPI backend
+- Starts the React frontend
+- Opens both in separate terminal windows
 
-Then open **http://127.0.0.1:8000** in your browser.
+### Option 2 (Manual)
+
+**Terminal 1 — backend:**
+```bash
+cd backend
+python -m uvicorn main:app --host 127.0.0.1 --port 8000
+```
+Backend API: `http://127.0.0.1:8000`
+
+**Terminal 2 — frontend (dev server):**
+```bash
+cd frontend
+npm run dev
+```
+Vite dev server: `http://localhost:5173`
+
+Open the Vite URL shown in your terminal (typically
+`http://localhost:5173`) — the frontend dev server talks to the backend
+API running on port 8000.
+
+If you'd rather serve a production build instead of the dev server, build
+the frontend first (`npm run build`) and let the backend serve the static
+build directly from `http://127.0.0.1:8000`.
 
 ---
 
@@ -331,9 +347,10 @@ slower and to use significantly more RAM.
 ## 7. Offline Usage
 
 Internet is required only for:
-- Installing Ollama
+- Installing Ollama and Node.js
 - Pulling models (`ollama pull`)
 - Downloading embedding models on first launch
+- Installing npm/pip dependencies
 
 After setup is complete, RAG-Professor can operate entirely offline.
 
@@ -414,7 +431,7 @@ rag_project/
 │   ├── src/               React components, hooks, styles
 │   ├── public/             Static assets
 │   ├── package.json
-│   └── ...                 Standard React app (build with `npm run build`)
+│   └── ...                 Standard React app (dev: npm run dev, build: npm run build)
 ├── data/                  Chroma DB + chat history live here (gitignore this)
 ├── requirements.txt
 ├── run.bat
