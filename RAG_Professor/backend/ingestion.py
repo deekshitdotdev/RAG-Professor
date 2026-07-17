@@ -17,9 +17,9 @@ from typing import List
 
 import fitz  # PyMuPDF
 
-import config
-import llm
-import runtime_state
+import RAG_Professor.backend.config as config
+import RAG_Professor.backend.llm as llm
+import RAG_Professor.backend.runtime_state as runtime_state
 
 logger = logging.getLogger("ingestion")
 

@@ -5,9 +5,9 @@ import logging
 import re
 from typing import Generator, List, Tuple
 
-import config
-import llm
-from vectorstore import get_store
+import RAG_Professor.backend.config as config
+import RAG_Professor.backend.llm as llm
+from RAG_Professor.backend.vectorstore import get_store
 
 logger = logging.getLogger("rag_engine")
 

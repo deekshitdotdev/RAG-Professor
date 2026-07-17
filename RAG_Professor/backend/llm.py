@@ -10,8 +10,8 @@ from typing import Generator, List, Optional
 
 import requests
 
-import config
-import runtime_state
+import RAG_Professor.backend.config as config
+import RAG_Professor.backend.runtime_state as runtime_state
 
 logger = logging.getLogger("llm")
 

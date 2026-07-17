@@ -11,7 +11,7 @@ Features:
 """
 
 from threading import Lock
-import config
+import RAG_Professor.backend.config as config
 
 _lock = Lock()
 

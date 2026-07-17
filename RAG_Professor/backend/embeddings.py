@@ -9,7 +9,7 @@ from typing import List
 import torch
 from sentence_transformers import SentenceTransformer
 
-import config
+import RAG_Professor.backend.config as config
 
 logger = logging.getLogger("embeddings")
 

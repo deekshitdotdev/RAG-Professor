@@ -16,9 +16,9 @@ import chromadb
 from chromadb.config import Settings
 from rank_bm25 import BM25Okapi
 
-import config
-from embeddings import get_embedding_model
-from ingestion import Chunk, Document
+import RAG_Professor.backend.config as config
+from RAG_Professor.backend.embeddings import get_embedding_model
+from RAG_Professor.backend.ingestion import Chunk, Document
 
 logger = logging.getLogger("vectorstore")
 

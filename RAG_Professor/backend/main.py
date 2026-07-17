@@ -17,12 +17,12 @@ from fastapi.responses import StreamingResponse, FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-import config
-import llm
-import runtime_state
-import system_monitor
-from ingestion import ingest_file
-from vectorstore import get_store
+import RAG_Professor.backend.config as config
+import RAG_Professor.backend.llm as llm
+import RAG_Professor.backend.runtime_state as runtime_state
+import RAG_Professor.backend.system_monitor as system_monitor
+from RAG_Professor.backend.ingestion import ingest_file
+from RAG_Professor.backend.vectorstore import get_store
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s] %(levelname)s: %(message)s")
 logger = logging.getLogger("main")
@@ -213,7 +213,7 @@ def ask(req: AskRequest):
 
 
 def _stream_answer_safe(query: str):
-    from rag_engine import stream_answer
+    from RAG_Professor.backend.rag_engine import stream_answer
     try:
         yield from stream_answer(query)
     except Exception as e:
