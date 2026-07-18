@@ -1,4 +1,4 @@
-# Docbench (React)
+# Doc-Professor (React)
 
 A React + Vite rebuild of the Docbench offline document assistant UI.
 
