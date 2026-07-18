@@ -43,7 +43,7 @@ export default function ChatMessages({ messages, documentName }) {
             ) : (
               <>
                 <h2>Upload a document to begin</h2>
-                <p>Docbench reads your PDF or TXT file entirely on this machine, then answers questions about it with page-cited excerpts. Nothing leaves your computer.</p>
+                <p>Doc-Professor reads your PDF or TXT file entirely on this machine, then answers questions about it with page-cited excerpts. Nothing leaves your computer.</p>
               </>
             )}
           </div>
