@@ -1,126 +1,93 @@
-# Rag-Professor — Offline Document Assistant
+# 🎓 RAG-Professor
 
-Upload one PDF or TXT file at a time, ask questions about it, get streamed
-answers with page citations — entirely on your own machine after setup.
-No internet is used at query time.
+> **知行合一 (Zhī Xíng Hé Yī)**
+>
+> *Knowledge and action are one.*
 
-Runs on everything from CPU-only laptops to gaming PCs with dedicated
-GPUs — pick the model that matches your hardware from the table below.
+Offline Document Intelligence powered by Ollama, FastAPI, React, ChromaDB, and modern Retrieval-Augmented Generation (RAG).
+
+Upload one PDF or TXT file at a time, ask questions about it, and get streamed answers with page citations — entirely on your own machine after setup. No internet is used at query time.
 
 ---
 
-## 1. System Requirements & Model Recommendations
+## ✨ Features
+## 功能特点
 
-### Minimum Requirements
-- Windows 10/11, Linux, or macOS
-- 8 GB RAM (16 GB recommended)
-- Dual-core CPU or better
-- 5 GB free disk space
-- Ollama installed
-- Node.js installed (for the React frontend)
+- 📄 Upload PDF and TXT documents
+- 🔍 Hybrid Search (Vector + BM25 + RRF)
+- 🤖 Local AI using Ollama
+- 🧠 Multiple LLM support
+- 👁 Automatic OCR for scanned PDFs
+- 📖 Page citations in every answer
+- ⚡ Streaming responses
+- 🌙 Modern React interface
+- 📋 Copy answers
+- 🔊 Text-to-Speech
+- 📊 Live CPU / RAM / GPU monitoring
+- 🔄 Switch models without restarting
+- 🔒 Completely offline after setup
 
-### No GPU? No Problem
+---
 
-RAG-Professor works perfectly on CPU-only systems. If your computer does
-not have an NVIDIA RTX GPU, AMD GPU, or other dedicated graphics card,
-simply use a smaller Ollama model such as:
+## 🏗 Architecture
+## 系统架构
 
-```bash
-ollama pull qwen3:4b
+```
+                PDF / TXT
+                    │
+                    ▼
+            Document Extraction
+                    │
+          OCR (if required)
+                    │
+                    ▼
+          Text Chunking
+                    │
+                    ▼
+     SentenceTransformer Embeddings
+                    │
+                    ▼
+      ChromaDB + BM25 Hybrid Search
+                    │
+                    ▼
+            Context Compression
+                    │
+                    ▼
+          Ollama Local LLM
+                    │
+                    ▼
+         Streamed Answer + Citations
 ```
 
-Recommended CPU-friendly models:
+---
 
-| Model      | Recommended For                   |
-|------------|------------------------------------|
-| qwen3:4b   | Best balance of speed and quality |
-| gemma3:4b  | Lightweight and efficient         |
-| qwen3:1.7b | Very low-end systems               |
-| phi4-mini  | Fast responses with low RAM usage |
+## 📚 Supported Files
+## 支持的文件格式
 
-For CPU-only machines:
-```env
-LLM_MODEL=qwen3:4b
-```
+Currently supported:
 
-### Recommended Requirements
+- PDF
+- TXT
 
-For the best experience:
-- 16 GB RAM
-- NVIDIA RTX GPU (6 GB+ VRAM)
-- Intel i5/Ryzen 5 or better
+Planned:
 
-Recommended model:
-```bash
-ollama pull qwen3:8b
-```
-```env
-LLM_MODEL=qwen3:8b
-```
+- DOCX
+- Markdown
+- HTML
 
-This provides significantly better reasoning, explanations, and document
-understanding.
+---
 
-### High-End Systems
+## 💻 Recommended Hardware
+## 推荐硬件
 
-If you have an RTX 4070 / 4080 / 4090 and 32 GB+ RAM, you can experiment
-with larger models:
-
-```bash
-ollama pull qwen2.5:14b
-```
-or
-```bash
-ollama pull deepseek-r1:14b
-```
-
-These models generally produce higher-quality answers but require
-substantially more memory.
-
-### ⚠️ Heat & Thermals — Especially on Laptops
-
-Running larger models (8B and up) pushes sustained CPU/GPU load for the
-whole time an answer streams, and on laptops in particular this shows up
-as fan noise, hot chassis, and thermal throttling — which then makes
-generation *slower*, not faster. This is worse if any part of the model
-spills from VRAM onto CPU.
-
-If you notice your laptop getting uncomfortably hot, throttling, or the
-fans running at full speed constantly:
-- **Drop to a smaller model** — `qwen3:4b`, `gemma3:4b`, or `qwen3:1.7b`
-  on very low-end machines. These run noticeably cooler and are usually
-  fast enough for everyday document Q&A.
-- Lower `LLM_NUM_CTX` (e.g. to `4096`) — a smaller context window means
-  less sustained compute per answer.
-- Avoid the 14B+ models on laptop-class hardware entirely; they're really
-  meant for desktop-class cooling and power budgets.
-- Give the laptop airflow (elevate it, don't run it on a bed/couch) and
-  consider a cooling pad if you plan to use a larger model regularly.
-
-When in doubt, prefer the smaller model — the quality difference is
-often smaller than the thermal cost on a laptop.
-
-### ⏳ Be Patient — This Runs Entirely on Your Machine
-
-Unlike cloud AI tools, every query here is actually computed on your own
-CPU/GPU — there's no server farm behind it. That means response time
-depends entirely on your hardware:
-
-- On a lower-end system (no GPU, or a small model like `qwen3:1.7b`),
-  answers may take noticeably longer to stream in, especially for longer
-  documents or longer answers.
-- On a GPU-equipped system with a well-matched model, answers stream
-  much faster, but the *first* query after starting the app (or after
-  switching models) is always slower — that's the model being loaded
-  into memory.
-- Bigger models are smarter but slower and hotter — if you're on a
-  laptop or a modest machine, use a smaller model like `qwen3:4b` or
-  `qwen3:1.7b` both to keep things cool (see above) and to get faster,
-  more comfortable response times.
-
-If a query feels stuck, check the terminal running `uvicorn`/`ollama
-serve` and the CPU/GPU meters in the sidebar before assuming something's
-broken — it may just be genuinely computing.
+| Hardware | Recommendation |
+|---|---|
+| CPU | Intel i5 / Ryzen 5+ |
+| RAM | 16GB |
+| GPU | RTX 3050 6GB+ |
+| Storage | SSD |
+| Python | 3.11 |
+| Node | Latest LTS |
 
 ### Suggested Models by Hardware
 
@@ -133,78 +100,71 @@ broken — it may just be genuinely computing.
 | 32 GB RAM + RTX 4070+     | qwen2.5:14b               |
 | 64 GB RAM + High-End GPU  | DeepSeek-R1 14B+          |
 
+**No GPU? No problem** — RAG-Professor works perfectly on CPU-only systems. Just use a smaller model:
+```bash
+ollama pull qwen3:4b
+```
+```env
+LLM_MODEL=qwen3:4b
+```
+
+**⚠️ Heat & thermals (especially on laptops):** running 8B+ models pushes sustained CPU/GPU load for the whole time an answer streams — on laptops this shows up as fan noise, heat, and throttling. If that happens, drop to `qwen3:4b` / `gemma3:4b` / `qwen3:1.7b`, lower `LLM_NUM_CTX` (e.g. `4096`), and avoid 14B+ models on laptop-class hardware.
+
+**⏳ Be patient** — everything runs on your own CPU/GPU, so response time depends entirely on your hardware. The first query after startup or after switching models is always slower (model loading into memory).
+
 ---
 
-## 2. One-time setup
+## 🧩 Software Requirements
+## 环境要求
 
-### 2.1 Python
-Install Python 3.10 or 3.11 (3.12+ can have wheel-availability issues with
-some of these packages). Confirm with:
-```
+Required:
+- Python 3.10 or 3.11 (3.12+ can have wheel-availability issues)
+- Node.js 20+
+- npm
+- Ollama
+
+Recommended:
+- Git
+- VS Code
+
+---
+
+## 🛠 Installation
+## 安装指南
+
+### 1. Python
+```bash
 python --version
 ```
 
-### 2.2 Ollama (runs the LLM)
-Get it from https://ollama.com/download if you don't already have it.
-
-Pull the models you need (one-time downloads, needs internet). At minimum:
-```
+### 2. Ollama (runs the LLM)
+Get it from https://ollama.com/download, then pull the models you need (one-time, needs internet):
+```bash
 ollama pull qwen3:8b
 ollama pull qwen3-vl:2b
 ```
-- The chat model (default **`qwen3:8b`**, adjust per the hardware table
-  above) answers your questions — text chat, coding, math, general Q&A
-  over the document.
-- **`qwen3-vl:2b`** is only used automatically when a PDF page has little or
-  no extractable text (i.e. it's scanned/image-only) — it OCRs that page
-  before chunking. You never call it directly; ingestion decides per-page.
-
-(If you installed Ollama as a Windows service, or via Homebrew/systemd on
-macOS/Linux, it may already be running in the background — check with
-`ollama list`.)
+- The chat model (default `qwen3:8b`) answers your questions.
+- `qwen3-vl:2b` is used automatically only when a PDF page has little or no extractable text (scanned/image-only) — it OCRs that page before chunking.
 
 Verify installed models any time:
 ```bash
 ollama list
 ```
-Example output:
-```text
-NAME
-qwen3:8b
-qwen3:4b
-gemma3:4b
-```
 
-Any installed Ollama model can be selected inside the application without
-reinstalling RAG-Professor — the chat and vision models can be swapped
-anytime from the sidebar dropdowns without restarting anything.
-
-### 2.3 PyTorch (needed for embeddings; CPU build is fine and recommended)
-```
+### 3. PyTorch (CPU build recommended)
+```bash
 pip install torch --index-url https://download.pytorch.org/whl/cpu
 ```
-We deliberately install the **CPU** build of PyTorch here — the embedding
-model runs on CPU by default, so you don't need the multi-GB CUDA build of
-torch at all. This alone saves you a large, fragile install step.
+The embedding model runs on CPU by default, so the multi-GB CUDA build isn't needed. If you want GPU embeddings, install the CUDA build matching your driver and set `EMBEDDING_DEVICE=cuda`.
 
-If you later want GPU embeddings anyway (only worth it if your GPU has
-VRAM to spare beyond what the LLM needs), replace the command above with
-the CUDA build matching your driver from
-https://pytorch.org/get-started/locally/, and set `EMBEDDING_DEVICE=cuda`
-(see Configuration below).
-
-### 2.4 Backend dependencies
-```
+### 4. Backend dependencies
+```bash
 cd rag_project
 pip install -r requirements.txt
 ```
+First run downloads the embedding model (`BAAI/bge-base-en-v1.5`, ~440MB) — needs internet once, then it's cached and fully offline.
 
-The first time you run the app, `sentence-transformers` will download the
-embedding model (`BAAI/bge-base-en-v1.5`, ~440MB) — this needs internet
-**once**. After that, it's cached locally and the app works fully offline.
-
-### 2.5 Frontend dependencies
-The frontend is a React app. Install its dependencies once:
+### 5. Frontend dependencies
 ```bash
 cd frontend
 npm install
@@ -212,103 +172,71 @@ npm install
 
 ---
 
-## 3. Running RAG-Professor
+## 🚀 How to Use
+## 使用方法
 
-### Start Ollama
-Open a terminal and run:
+1. Start Ollama:
 ```bash
 ollama serve
 ```
-If Ollama is installed as a background service, you can skip this step.
-
-### Option 1 (Recommended)
-Simply run:
+2. Run:
 ```bash
 run.bat
 ```
-The launcher automatically:
-- Starts the FastAPI backend
-- Starts the React frontend
-- Opens both in separate terminal windows
-
-### Option 2 (Manual)
-
-**Terminal 1 — backend:**
-```bash
-cd backend
-python -m uvicorn main:app --host 127.0.0.1 --port 8000
+3. Open:
 ```
-Backend API: `http://127.0.0.1:8000`
-
-**Terminal 2 — frontend (dev server):**
-```bash
-cd frontend
-npm run dev
+http://localhost:5173
 ```
-Vite dev server: `http://localhost:5173`
+4. Upload a PDF or TXT.
+5. Wait until indexing completes (watch the CPU meter — that's embedding running).
+6. Ask anything.
 
-Open the Vite URL shown in your terminal (typically
-`http://localhost:5173`) — the frontend dev server talks to the backend
-API running on port 8000.
+Example prompts:
 
-If you'd rather serve a production build instead of the dev server, build
-the frontend first (`npm run build`) and let the backend serve the static
-build directly from `http://127.0.0.1:8000`.
+> Explain Chapter 5
+>
+> Summarize this paper
+>
+> List all equations
+>
+> Give me interview questions from this document
+>
+> Translate page 8
+>
+> Find all references to neural networks
+
+Every answer streams in live with clickable page citations, plus **Copy** and **Read aloud** buttons. Past questions appear in the sidebar history. Uploading a new file replaces the current one — RAG-Professor works with one document at a time, and the original file is deleted from disk right after indexing (only the searchable index remains).
 
 ---
 
-## 4. Using it
+## 🖥 Example Workflow
+## 工作流程示例
 
-1. Drag a PDF or TXT onto the sidebar (or click to browse).
-2. Wait for indexing to finish (a few seconds for a typical document —
-   watch the CPU meter, that's the embedding step running).
-3. Ask questions in the chat box. Answers stream in live, with clickable
-   page citations under each answer.
-4. Every AI answer has **Copy** (clipboard) and **Read aloud** (uses your
-   browser's built-in text-to-speech, works offline) buttons.
-5. Past questions appear in the sidebar history — click one to reuse it.
-6. Uploading a new file replaces the current one (this app is designed
-   for one document at a time). The original file is deleted from disk
-   immediately after indexing — only the searchable index remains.
-
----
-
-## 5. Design choices & why
-
-- **Embeddings on CPU, LLM on GPU (when a GPU is present).** VRAM is
-  usually the tightest resource on a GPU-equipped machine. Running the
-  embedding model on the GPU alongside the LLM means two processes
-  fighting over the same VRAM budget, which is how you get VRAM overflow,
-  driver fallback to shared system memory, and heat/throttling on a
-  laptop chassis. CPU embedding of a single document is fast (seconds,
-  not minutes), so there's little real cost to keeping it off the GPU.
-
-- **Match the chat model to your VRAM.** An 8B model at Q4 is roughly
-  5.5GB, which is a tight fit in 6GB VRAM once the context window's KV
-  cache grows during a long answer — it may spill a few layers to CPU
-  under load. If a model feels slow, the fastest fixes are lowering
-  `LLM_NUM_CTX` (e.g. to 4096) or switching to a smaller model like
-  `qwen3:4b` from the sidebar dropdown, no restart needed.
-
-- **Vision model for OCR/vision only**, used when a PDF page comes back
-  with almost no extractable text (scanned pages, photographed pages,
-  image-only PDFs). Ollama loads/unloads models from VRAM as needed, so
-  this doesn't have to coexist with the chat model in memory at the same
-  time — it's swapped in briefly during ingestion, then swapped back out.
-
-- **No cross-encoder reranker by default.** It's implemented and you can
-  turn it on (`USE_RERANKER=true`), but for a single document with top-5
-  retrieval, hybrid search (vector + BM25 fused with Reciprocal Rank
-  Fusion) already gets you most of the accuracy benefit without loading
-  a third model.
-
----
-
-## 6. Configuration
-
-Everything tunable lives in `backend/config.py` with environment-variable
-overrides. Set these before running `run.bat`, e.g. in PowerShell:
 ```
+PDF
+ ↓
+Upload
+ ↓
+Index
+ ↓
+Ask Question
+ ↓
+Retrieve Chunks
+ ↓
+LLM
+ ↓
+Answer
+ ↓
+Citation
+```
+
+---
+
+## ⚙️ Configuration
+## 配置说明
+
+Everything tunable lives in `backend/config.py`, overridable via environment variables:
+```powershell
 $env:LLM_MODEL="qwen3:4b"
 run.bat
 ```
@@ -321,119 +249,180 @@ run.bat
 | `OCR_MIN_CHARS_PER_PAGE` | `40` | Below this many extracted chars, a page is treated as scanned |
 | `OCR_MAX_PAGES` | `60` | Safety cap on how many pages will be OCR'd per upload |
 | `EMBEDDING_DEVICE` | `cpu` | `cpu` or `cuda` |
-| `EMBEDDING_MODEL` | `BAAI/bge-base-en-v1.5` | Swap for `BAAI/bge-small-en-v1.5` if you want faster/lighter |
+| `EMBEDDING_MODEL` | `BAAI/bge-base-en-v1.5` | Swap for `BAAI/bge-small-en-v1.5` for faster/lighter |
 | `USE_RERANKER` | `false` | Adds a cross-encoder rerank pass (more accurate, more compute) |
 | `TOP_K` | `5` | How many chunks are sent to the LLM as context |
 | `CHUNK_SIZE_TOKENS` | `700` | Target chunk size |
 | `LLM_NUM_CTX` | `8192` | Context window given to Ollama |
 | `MAX_FILE_SIZE_MB` | `200` | Upload size cap |
 
-The chat and vision models can also be switched live from the two
-dropdowns in the sidebar — this calls `POST /api/model` and takes effect
-on your next question/upload, no restart required.
-
-**If you want a lighter/faster setup** (e.g. running on modest hardware
-or while other apps are open): `LLM_MODEL=qwen3:4b` — noticeably faster
-generation, with a moderate quality trade-off.
-
-**If you want maximum quality** and have the VRAM/RAM to spare:
-`USE_RERANKER=true` plus a larger model like `qwen2.5:14b` or
-`deepseek-r1:14b` — but a 14B model at Q4 is roughly 9GB, which will
-**not** fit in 6GB VRAM and will run partly on CPU. Expect it to be
-slower and to use significantly more RAM.
+Chat and vision models can also be switched live from the sidebar dropdowns — no restart required.
 
 ---
 
-## 7. Offline Usage
+## 🌐 Offline Usage
+## 离线运行
 
 Internet is required only for:
 - Installing Ollama and Node.js
 - Pulling models (`ollama pull`)
-- Downloading embedding models on first launch
+- Downloading the embedding model on first launch
 - Installing npm/pip dependencies
 
-After setup is complete, RAG-Professor can operate entirely offline.
+After setup, RAG-Professor runs entirely offline.
 
 ---
 
-## 8. Troubleshooting
+## 🧠 Design Choices & Why
+## 设计理念
 
-- **"Cannot reach Ollama"** — make sure `ollama serve` is running and
-  `ollama list` shows your model.
-- **Sidebar shows GPU as "n/a"** — `nvidia-smi` isn't on your PATH, or
-  drivers aren't installed. The app still works, just without live GPU
-  stats; Ollama will still use the GPU internally if available.
-- **First upload is slow** — the embedding model is downloading (one-time,
-  needs internet). Subsequent runs are fast and fully offline.
-- **Answers seem to ignore the document** — check the citation chips
-  under the answer; if none appear, your question likely isn't covered
-  by the document, and the model is told to say so rather than guess.
-- **Everything feels sluggish** — check the RAM meter in the sidebar. If
-  it's pinned near 100%, close browser tabs/other apps; the OS will be
-  swapping to disk, which no amount of GPU tuning fixes.
-- **Upload fails with "No extractable text found"** — either the file is
-  genuinely empty, or (for a scanned PDF) OCR failed. Check the terminal
-  log for `OCR'd page N with <vision model>` lines; if you don't see them,
-  make sure the vision model is pulled (`ollama list`) and `AUTO_OCR` isn't
-  set to `false`.
-- **Chat box stays greyed out / nothing is clickable** — this almost
-  always means the upload itself failed silently. Check the terminal
-  running `uvicorn` for the actual error; every error is returned as
-  JSON with a real message instead of a generic crash, so the popup
-  alert on upload should tell you what went wrong.
-- **You see `Failed to send telemetry event ... capture()` in the logs**
-  — this is ChromaDB's anonymous usage telemetry hitting a bug in its own
-  library, not a problem with your data. It's disabled in this build; if
-  you still see it, make sure you're running the latest files.
+- **Embeddings on CPU, LLM on GPU (when present)** — keeps VRAM free for the LLM instead of two processes fighting over it.
+- **Match the chat model to your VRAM** — an 8B model at Q4 is ~5.5GB; drop `LLM_NUM_CTX` or the model size if it's tight.
+- **Vision model for OCR only** — swapped in briefly during ingestion, then unloaded.
+- **No reranker by default** — hybrid search (vector + BM25 with RRF) already covers most of the accuracy gain for single-document, top-5 retrieval; enable `USE_RERANKER=true` if you want it.
 
 ---
 
-## 9. Installing Additional Models
+## 🩺 Troubleshooting
+## 常见问题排查
 
-RAG-Professor uses Ollama, which makes switching models easy.
-
-```bash
-ollama pull qwen3:8b
-```
-or
-```bash
-ollama pull qwen3:4b
-```
-or
-```bash
-ollama pull gemma3:4b
-```
-
-Verify installed models:
-```bash
-ollama list
-```
-
-Any installed Ollama model can be selected inside the application without
-reinstalling RAG-Professor.
+- **"Cannot reach Ollama"** — make sure `ollama serve` is running and `ollama list` shows your model.
+- **Sidebar shows GPU as "n/a"** — `nvidia-smi` isn't on PATH, or drivers aren't installed; the app still works without live GPU stats.
+- **First upload is slow** — the embedding model is downloading (one-time).
+- **Answers seem to ignore the document** — check the citation chips; if none appear, the question likely isn't covered by the document.
+- **Everything feels sluggish** — check the RAM meter; near 100% means the OS is swapping to disk.
+- **Upload fails with "No extractable text found"** — check the terminal for `OCR'd page N` lines; confirm the vision model is pulled and `AUTO_OCR` isn't `false`.
+- **Chat box stays greyed out** — check the `uvicorn` terminal for the real error.
+- **`Failed to send telemetry event ... capture()` in logs** — a harmless ChromaDB telemetry bug, already disabled in this build.
 
 ---
 
-## 10. Project structure
+## ⚡ Performance Tips
+## 性能优化建议
+
+- Use `qwen3:4b` for CPU-only systems.
+- Use `qwen3:8b` for RTX 3050/4060.
+- Use `qwen2.5:14b` only with 32GB+ RAM.
+- Smaller context windows reduce RAM usage.
+- Restart Ollama after switching large models.
+
+---
+
+## ❓ FAQ
+## 常见问题
+
+**Does this require internet?** Only during installation.
+
+**Can I use my own model?** Yes.
+
+**Can I upload multiple PDFs?** One document at a time.
+
+**Does it send my data online?** Never.
+
+**Can I change the embedding model?** Yes.
+
+**Can I disable OCR?** Yes.
+
+---
+
+## 🛣 Roadmap
+## 开发路线图
+
+- [x] PDF support
+- [x] TXT support
+- [x] Hybrid Search
+- [x] OCR
+- [x] Streaming
+- [ ] DOCX support
+- [ ] Multi-document chat
+- [ ] Session management
+- [ ] Docker support
+- [ ] Authentication
+- [ ] REST API documentation
+
+---
+
+## 📂 Folder Structure
+## 项目结构
 
 ```
 rag_project/
 ├── backend/
-│   ├── main.py          FastAPI app & routes
-│   ├── config.py        All settings, env-overridable
-│   ├── ingestion.py      PDF/TXT extraction, header/footer stripping, chunking
-│   ├── embeddings.py     SentenceTransformer wrapper
-│   ├── vectorstore.py    ChromaDB + BM25 hybrid search (RRF fusion)
-│   ├── llm.py            Streaming Ollama client
-│   ├── rag_engine.py     Retrieval → context compression → prompt → generation
-│   └── system_monitor.py CPU/RAM/GPU stats for the UI
+│   ├── main.py
+│   ├── config.py
+│   ├── ingestion.py
+│   ├── embeddings.py
+│   ├── vectorstore.py
+│   ├── llm.py
+│   ├── rag_engine.py
+│   └── system_monitor.py
 ├── frontend/
-│   ├── src/               React components, hooks, styles
-│   ├── public/             Static assets
-│   ├── package.json
-│   └── ...                 Standard React app (dev: npm run dev, build: npm run build)
-├── data/                  Chroma DB + chat history live here (gitignore this)
+│   ├── src/
+│   │   ├── components
+│   │   ├── hooks
+│   │   ├── pages
+│   │   ├── context
+│   │   └── utils
+│   └── App.jsx
+├── data/
 ├── requirements.txt
 ├── run.bat
 └── README.md
 ```
+
+---
+
+## 🤝 Contributing
+## 参与贡献
+
+Contributions are welcome!
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push your branch
+5. Open a Pull Request
+
+## 🟢 Open for Contributors
+## 欢迎贡献者
+
+This project is actively open for contributions — issues, PRs, docs, translations, and ideas are all welcome, from first-timers to experienced devs. Good places to start:
+
+- Check the **Roadmap** above for unclaimed items (DOCX support, multi-document chat, Docker, etc.)
+- Open an issue before starting large changes so we can align on approach
+- Small fixes (typos, docs, bugs) are always welcome without prior discussion
+- Tag your PR with what it touches (backend / frontend / docs) to speed up review
+
+欢迎任何形式的贡献——无论是提交 Issue、Pull Request、完善文档还是翻译，新手和资深开发者都同样欢迎。可以从路线图中未认领的功能开始，或先提交 Issue 讨论较大的改动。
+
+---
+
+## ⭐ Support
+## 支持项目
+
+If this project helped you, consider giving it a ⭐ on GitHub.
+
+如果这个项目对你有帮助，欢迎在 GitHub 上点个 ⭐。
+
+---
+
+
+<p align="center">
+
+Built for developers, researchers, and students.
+
+**持续学习 · 持续创新**
+## 🟢 Open for Contributors
+## 欢迎贡献者
+
+This project is actively open for contributions — issues, PRs, docs, translations, and ideas are all welcome, from first-timers to experienced devs. Good places to start:
+
+- Check the **Roadmap** above for unclaimed items (DOCX support, multi-document chat, Docker, etc.)
+- Open an issue before starting large changes so we can align on approach
+- Small fixes (typos, docs, bugs) are always welcome without prior discussion
+- Tag your PR with what it touches (backend / frontend / docs) to speed up review
+
+欢迎任何形式的贡献——无论是提交 Issue、Pull Request、完善文档还是翻译，新手和资深开发者都同样欢迎。可以从路线图中未认领的功能开始，或先提交 Issue 讨论较大的改动。
+*Keep Learning • Keep Innovating*
+
+</p>
